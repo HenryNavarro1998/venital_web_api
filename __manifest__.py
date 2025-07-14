@@ -1,0 +1,15 @@
+{
+    'name': 'Venital Web API',
+    'version': '1.0.0',
+    'summary': 'API REST para gestión de marcas (Brand) en Odoo',
+    'description': 'Proporciona endpoints REST para la gestión de marcas.',
+    'author': 'Tu Nombre o Empresa',
+    'license': 'LGPL-3',
+    'website': 'https://tusitio.com',
+    'category': 'Tools',
+    'depends': ['auto_part_base', 'contacts'],
+    'data': [],
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+}
