@@ -6,13 +6,16 @@ from .utils import search_paginate, validate_limits
 
 class BrandController(http.Controller):
 
-    @route('/brand', auth='public', type='http', methods=['GET'])
+    @route('/auto-mfg-brand', auth='public', type='http', methods=['GET'])
     @validate_limits()
     def get_brands(self, **kwargs):
         page = kwargs.get("page")
         limit = kwargs.get("limit")
-        order = kwargs.get("order")
+        order = kwargs.get("order", "")
         domain = []
+
+        if "reverse" in kwargs:
+            order += " desc"
 
         if "name" in kwargs:
             domain.append(("name", "ilike", kwargs["name"]))

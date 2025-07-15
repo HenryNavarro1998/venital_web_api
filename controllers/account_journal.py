@@ -1,12 +1,13 @@
+from collections import defaultdict
 from odoo import http
 from odoo.http import route, request
 from .utils import search_paginate, validate_limits
 from datetime import datetime
 import json
 
-class ResPartnerController(http.Controller):
+class AccountJournal(http.Controller):
 
-    @route("/res-partner", auth="user", type="http", methods=["GET"])
+    @route("/account-journal", auth="user", type="http", methods=["GET"])
     @validate_limits()
     def get_partners(self, **kwargs):
         page = kwargs.get("page")
@@ -14,21 +15,33 @@ class ResPartnerController(http.Controller):
         order = kwargs.get("order", "")
         domain = []
 
+        domain.append(("type", "in", ["bank", "cash"]))
+
         if "reverse" in kwargs:
             order += " desc"
 
-        if kwargs.get("create_date"):
-            domain.append(("create_date", ">=", kwargs.get("create_date")))
-        
-        ResPartner = request.env["res.partner"].sudo()
+
+        if "id" in kwargs:
+            domain.append(("id", "=", kwargs.get("id")))
+
+
+        if "name" in kwargs:
+            domain.append(("name", "ilike", kwargs.get("name")))
+
+
+        if "company_id" in kwargs:
+            domain.append(("company_id", "=", kwargs.get("company_id")))
+
+
+        AccountJournal = request.env["account.journal"].sudo()
         
         data = search_paginate(
-            total_items=ResPartner.search_count([]),
+            total_items=AccountJournal.search_count([]),
             page=page,
             limit=limit
         )
 
-        items = ResPartner.search(
+        items = AccountJournal.search(
             domain=domain,
             offset=data.get("offset", 0),
             limit=data.get("items_per_page"),
@@ -36,15 +49,13 @@ class ResPartnerController(http.Controller):
         )
 
         data["items"] = [{
-            "id": partner.id,
-            "name": partner.name,
-            "document": partner.vat,
-            "email": partner.email,
-            "phone": partner.phone,
-            "mobile": partner.mobile 
-        } for partner in items]
+            "id": journal.id,
+            "name": journal.name,
+        } for journal in items]
 
         return request.make_response(
             json.dumps(data),
             headers=[("Content-Type", "application/json")]
         )
+
+

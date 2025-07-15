@@ -4,9 +4,9 @@ from .utils import search_paginate, validate_limits
 from datetime import datetime
 import json
 
-class ResPartnerController(http.Controller):
+class ResCurrency(http.Controller):
 
-    @route("/res-partner", auth="user", type="http", methods=["GET"])
+    @route("/res-currency", auth="user", type="http", methods=["GET"])
     @validate_limits()
     def get_partners(self, **kwargs):
         page = kwargs.get("page")
@@ -16,19 +16,16 @@ class ResPartnerController(http.Controller):
 
         if "reverse" in kwargs:
             order += " desc"
-
-        if kwargs.get("create_date"):
-            domain.append(("create_date", ">=", kwargs.get("create_date")))
         
-        ResPartner = request.env["res.partner"].sudo()
+        ResCurrency = request.env["res.currency"].sudo()
         
         data = search_paginate(
-            total_items=ResPartner.search_count([]),
+            total_items=ResCurrency.search_count([]),
             page=page,
             limit=limit
         )
 
-        items = ResPartner.search(
+        items = ResCurrency.search(
             domain=domain,
             offset=data.get("offset", 0),
             limit=data.get("items_per_page"),
@@ -36,13 +33,10 @@ class ResPartnerController(http.Controller):
         )
 
         data["items"] = [{
-            "id": partner.id,
-            "name": partner.name,
-            "document": partner.vat,
-            "email": partner.email,
-            "phone": partner.phone,
-            "mobile": partner.mobile 
-        } for partner in items]
+            "id": currency.id,
+            "name": currency.name,
+            "symbol": currency.symbol,
+        } for currency in items]
 
         return request.make_response(
             json.dumps(data),
