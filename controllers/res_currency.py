@@ -1,14 +1,14 @@
 from odoo import http
 from odoo.http import route, request
-from .utils import search_paginate, validate_limits
 from datetime import datetime
+from .utils import search_paginate, validate_limits
 import json
 
 class ResCurrency(http.Controller):
 
     @route("/res-currency", auth="user", type="http", methods=["GET"])
     @validate_limits()
-    def get_partners(self, **kwargs):
+    def get_currencies(self, **kwargs):
         page = kwargs.get("page")
         limit = kwargs.get("limit")
         order = kwargs.get("order", "")
@@ -37,6 +37,46 @@ class ResCurrency(http.Controller):
             "name": currency.name,
             "symbol": currency.symbol,
         } for currency in items]
+
+        return request.make_response(
+            json.dumps(data),
+            headers=[("Content-Type", "application/json")]
+        )
+
+    @route("/res-currency-rate", auth="user", type="http", methods=["GET"])
+    def get_currency_rates(self, *args, **kwargs):
+        
+        domain = []
+
+        if "company_id" in kwargs:
+            domain.append(("company_id", "=", kwargs.get("company_id")))
+            
+        if "currency_id" in kwargs:
+            domain.append(("currency_id", "=", kwargs.get("currency_id")))
+        
+        if "from_date" in kwargs:
+            domain.append(("name",">=", kwargs.get("from_date")))
+        
+        if "to_date" in kwargs:
+            domain.append(("name", "<=", kwargs.get("to_date")))
+        
+        ResCurrencyRate = request.env["res.currency.rate"].sudo()
+
+        items = ResCurrencyRate.search(
+            domain=domain,
+            order="name desc",
+        )
+
+        data = [{
+            "currency": {
+                "id": rate.currency_id.id,
+                "name": rate.currency_id.name
+            },
+            "date": rate.name.strftime("%Y/%m/%d")
+                    if rate.name else False,
+            "rate": rate.company_rate,
+            
+        } for rate in items]
 
         return request.make_response(
             json.dumps(data),
