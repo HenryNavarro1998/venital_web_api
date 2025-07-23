@@ -6,7 +6,7 @@ import json
 
 class ResPartnerController(http.Controller):
 
-    @route("/res-partner", auth="user", type="http", methods=["GET"])
+    @route("/partners", auth="user", type="http", methods=["GET"])
     @validate_limits()
     def get_partners(self, **kwargs):
         page = kwargs.get("page")
