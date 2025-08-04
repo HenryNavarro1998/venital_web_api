@@ -6,7 +6,7 @@ import json
 
 class ResCountryState(http.Controller):
 
-    @route("/res-country-state", auth="user", type="http", methods=["GET"])
+    @route("/res-country-state", auth="api_key", type="http", methods=["GET"])
     @validate_limits()
     def get_partners(self, **kwargs):
         page = kwargs.get("page")

@@ -7,7 +7,7 @@
     "license": "LGPL-3",
     "website": "https://tusitio.com",
     "category": "Tools",
-    "depends": ["auto_part_base", "contacts", "account", "sale_management", "website_sale"],
+    "depends": ["auth_api_key","auto_part_base", "contacts", "account", "sale_management", "website_sale", "stock"],
     "data": [],
     "installable": True,
     "application": False,

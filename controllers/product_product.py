@@ -6,7 +6,7 @@ import base64
 
 class ProductProduct(http.Controller):
 
-    @route("/products", type="http", auth="user", methods=["GET"])
+    @route("/products", type="http", auth="api_key", methods=["GET"])
     def products(self, *args, **kwargs):
         res = None
 
@@ -62,8 +62,33 @@ def _get_filters_domain(*args, **kwargs):
         id_filter = [model for model in kwargs.get("id", "").split(",")]
         domain.append(("id", "in", id_filter))
 
+    if "name" in kwargs:
+        name_filter = [name for name in kwargs.get("name", "").split(",")]
+        domain.append(("name", "in", name_filter))
+
     if "code" in kwargs:
         domain.append(("default_code", "ilike", kwargs.get("code")))
+
+    if "model" in kwargs:
+        model_filter = [model for model in kwargs.get("model", "").split(",")]
+        domain.append(("auto_model_ids", "in", model_filter))
+
+    if "brand" in kwargs:
+        brand_filter = [brand for brand in kwargs.get("brand", "").split(",")]
+        domain.append(("product_brand_id", "in", brand_filter))
+
+    if "year" in kwargs:
+        year_filter = [year for year in kwargs.get("year", "").split(",")]
+        domain.append(("auto_built_year_ids", "in", year_filter))
+
+    if "engine" in kwargs:
+        engine_filter = [engine for engine in kwargs.get("engine", "").split(",")]
+        domain.append(("auto_engine_ids", "in", engine_filter))
+
+    if "category" in kwargs:
+        category_filter = [category for category in kwargs.get("category", "").split(",")]
+        domain.append(("categ_id", "in", category_filter))
+
 
     return domain
 
@@ -75,6 +100,14 @@ def _get_product_data(product):
         "code": product.default_code,
         "price": product.lst_price,
         "priceTotal": product.lst_price,
+        "available": product.qty_available,
+        "available_by_location": [{
+            "location": {
+                "id": stock_quant.location_id.id,
+                "name": stock_quant.location_id.name
+            },
+            "quantity": stock_quant.quantity,
+        } for stock_quant in product.stock_quant_ids.filtered_domain([("location_id.usage", "=", "internal")])],
         "category": {
             "id": product.categ_id.id,
             "name": product.categ_id.name,
@@ -105,59 +138,3 @@ def _get_products_images(product):
         )
     ]
     
-
-    # @route("/product-product/photos", type="http", auth="user", methods=["GET"])
-    # @validate_limits()
-    # def get_photos(self, *args, **kwargs):
-    #     page = kwargs.get("page")
-    #     limit = kwargs.get("limit")
-    #     order = kwargs.get("order", "")
-    #     domain = []
-
-    #     if "reverse" in kwargs:
-    #         order += " desc"
-
-    #     if "id" in kwargs:
-    #         filter_id = [model for model in kwargs.get("id", "").split(",")]
-    #         domain.append(("id", "in", filter_id))
-
-    #     if "code" in kwargs:
-    #         domain.append(("default_code", "ilike", kwargs.get("code")))
-
-    #     #TODO: Filter by model, year and brand
-    #     # if "model" in kwargs:
-    #     #     filter_model = [model for model in kwargs.get("model", "").split(",")]
-    #     #     domain.append(("product_tag_ids", "in", filter_model))
-            
-
-    #     ProductProduct = request.env["product.product"].sudo()
-
-    #     data = search_paginate(
-    #         total_items=ProductProduct.search_count(domain=domain),
-    #         page=page,
-    #         limit=limit
-    #     )
-
-    #     items = ProductProduct.search(
-    #         domain=domain,
-    #         offset=data.get("offset", 0),
-    #         limit=data.get("items_per_page"),
-    #         order=order
-    #     )
-
-    #     data["items"] = [{
-    #         "id": product.id,
-    #         "name": product.name,
-    #         "code": product.default_code,
-    #         "photos": [
-    #             product.image_1920 and base64.b64encode(product.image_1920).decode('utf-8'),
-    #             *(product_image.image_1920 and base64.b64encode(product_image.image_1920).decode('utf-8')
-    #                 for product_image in product.product_template_image_ids)
-    #         ]
-    #     } for product in items] 
-
-    #     return request.make_response(
-    #         json.dumps(data),
-    #         headers=[("Content-Type", "application/json")]
-    #     )
-

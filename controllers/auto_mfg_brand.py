@@ -6,7 +6,7 @@ from .utils import search_paginate, validate_limits
 
 class BrandController(http.Controller):
 
-    @route('/auto-mfg-brand', auth='public', type='http', methods=['GET'])
+    @route('/auto-mfg-brand', auth='api_key', type='http', methods=['GET'])
     @validate_limits()
     def get_brands(self, **kwargs):
         page = kwargs.get("page")

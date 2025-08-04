@@ -7,7 +7,7 @@ import json
 
 class AccountJournal(http.Controller):
 
-    @route("/account-journal", auth="user", type="http", methods=["GET"])
+    @route("/account-journal", auth="api_key", type="http", methods=["GET"])
     @validate_limits()
     def get_partners(self, **kwargs):
         page = kwargs.get("page")

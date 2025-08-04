@@ -6,7 +6,7 @@ import json
 
 class ResCurrency(http.Controller):
 
-    @route("/res-currency", auth="user", type="http", methods=["GET"])
+    @route("/res-currency", auth="api_key", type="http", methods=["GET"])
     @validate_limits()
     def get_currencies(self, **kwargs):
         page = kwargs.get("page")
@@ -43,7 +43,7 @@ class ResCurrency(http.Controller):
             headers=[("Content-Type", "application/json")]
         )
 
-    @route("/res-currency-rate", auth="user", type="http", methods=["GET"])
+    @route("/res-currency-rate", auth="api_key", type="http", methods=["GET"])
     def get_currency_rates(self, *args, **kwargs):
         
         domain = []

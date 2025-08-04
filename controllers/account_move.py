@@ -7,7 +7,7 @@ import json
 
 class AccountMove(http.Controller):
 
-    @route("/account-move", auth="user", type="http", methods=["GET"])
+    @route("/account-move", auth="api_key", type="http", methods=["GET"])
     @validate_limits()
     def get_partners(self, **kwargs):
         page = kwargs.get("page")

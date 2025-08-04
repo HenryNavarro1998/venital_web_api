@@ -4,7 +4,7 @@ import json
 
 class ProductCategory(http.Controller):
 
-    @route("/product-category", type="http", auth="user", methods=["GET"])
+    @route("/product-category", type="http", auth="api_key", methods=["GET"])
     def get_product_category(self, *args, **kwargs):
 
         domain = [("parent_id", "=", False)]
