@@ -94,11 +94,16 @@ def _get_filters_domain(*args, **kwargs):
 
 
 def _get_product_data(product):
+    prices = product.taxes_id.compute_all(
+        price_unit=product.lst_price, product=product
+    )
+
     return {
         "id": product.id,
         "name": product.name,
         "code": product.default_code,
-        "price": product.lst_price,
+        "priceBase": product.lst_price,
+        "priceTax": product.lst_price,
         "priceTotal": product.lst_price,
         "available": product.qty_available,
         "available_by_location": [{

@@ -43,42 +43,16 @@ class ResPartnerController(http.Controller):
         data["items"] = [
             {
                 "id": partner.id,
-                "name": partner.name,
+                "name": partner.name or None,
                 "document": partner.vat or None,
-                "email": partner.email,
+                "email": partner.email or None,
                 "pricelist": {
                     "id": partner.property_product_pricelist.id,
                     "name": partner.property_product_pricelist.name
                 },
-                **self.get_address_info(partner),
-                # "addresses": addresses,
-                # "phones": phones,
-                # "addresses": [
-                #     {
-                #         "id": partner.id,
-                #         "type": "main",
-                #         "name": partner.name,
-                #         "street": partner.street,
-                #         "street2": partner.street2,
-                #         "city": partner.city,
-                #         "zip": partner.zip,
-                #         "phone": partner.phone,
-                #         "mobile": partner.mobile,
-                #         "state": {
-                #             "id": partner.state_id.id,
-                #             "name": partner.state_id.name,
-                #         },
-                #         "country": {
-                #             "id": partner.country_id.id,
-                #             "name": partner.country_id.name,
-                #         },
-                #     },
-                # ] + self.get_addresses(partner),
-                
-                "comment": partner.comment,
-                # "test": self.get_address_data(partner)
+                **self.get_address_info(partner, "main"), #addresses and phones
+                "comment": partner.comment or None,
             } for partner in items
-            # for addresses, phones in self.get_address_data(partner, partner_type="main")
         ]
 
 
@@ -87,16 +61,16 @@ class ResPartnerController(http.Controller):
             headers=[("Content-Type", "application/json")]
         )
 
-    def get_address_info(self, partner):
+    def get_address_info(self, partner, partner_type=None):
         data = {
             "addresses": [{
                 "id": partner.id,
-                "type": "main",
-                "name": partner.name,
-                "street": partner.street,
-                "street2": partner.street2,
-                "city": partner.city,
-                "zip": partner.zip,
+                "type": partner_type or partner.type,
+                "name": partner.name or None,
+                "street": partner.street or None,
+                "street2": partner.street2 or None,
+                "city": partner.city or None,
+                "zip": partner.zip or None,
                 "state": {
                     "id": partner.state_id.id,
                     "name": partner.state_id.name,
@@ -108,8 +82,8 @@ class ResPartnerController(http.Controller):
             }],
             "phones": [{
                 "id": partner.id,
-                "phone": partner.phone,
-                "mobile": partner.mobile,
+                "phone": partner.phone or None,
+                "mobile": partner.mobile or None,
             }]
         }
 
@@ -119,70 +93,3 @@ class ResPartnerController(http.Controller):
             data["phones"].extend(child_data["phones"])
         
         return data
-
-        
-
-
-    def get_address_data(self, partner, partner_type=None):
-
-        def get_childs(partner):
-            return partner.child_ids | (get_childs(child) for child in partner.child_ids)
-
-        all_address = get_childs(partner)
-
-        # data = {
-        #     "addresses": [{
-        #         "id": partner.id,
-        #         "type": partner_type or partner.type,
-        #         "name": partner.name or None,
-        #         "street": partner.street or None,
-        #         "street2": partner.street2 or None,
-        #         "city": partner.city or None,
-        #         "zip": partner.zip or None,
-        #         "state": {
-        #             "id": partner.state_id.id,
-        #             "name": partner.state_id.name,
-        #         } if partner.state_id else None,
-        #         "country": {
-        #             "id": partner.country_id.id,
-        #             "name": partner.country_id.name,
-        #         } if partner.country_id else None,
-        #     }],
-        #     "phones":[{
-        #         "id": partner.id,
-        #         "phone": partner.phone,
-        #         "mobile": partner.mobile
-        #     }]
-        # }
-
-        return True
-
-
-    def get_addresses(self, partner):
-
-        address_list = []
-        
-        for address in partner.child_ids:
-            address_list.extend([{
-            "id": address.id,
-            "type": address.type,
-            "name": address.name,
-            "street": address.street,
-            "street2": address.street2,
-            "city": address.city,
-            "zip": address.zip,
-            "phone": address.phone,
-            "mobile": address.mobile,
-            "state": {
-                "id": address.state_id.id,
-                "name": address.state_id.name,
-            },
-            "country": {
-                "id": address.country_id.id,
-                "name": address.country_id.name,
-            },
-        }])
-
-            address_list.extend(self.get_addresses(address))
-
-        return address_list
