@@ -106,6 +106,10 @@ def _get_product_data(product):
         "priceTax": round(prices.get("total_included") - product.lst_price, 2),
         "priceTotal": prices.get("total_included"),
         "available": product.qty_available,
+        "productBrand": {
+            "id": product.brand_id.id,
+            "name": product.brand_id.name
+        },
         "available_by_location": [{
             "location": {
                 "id": stock_quant.location_id.id,
