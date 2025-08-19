@@ -107,8 +107,8 @@ def _get_product_data(product):
         "priceTotal": prices.get("total_included"),
         "available": product.qty_available,
         "productBrand": {
-            "id": product.brand_id.id,
-            "name": product.brand_id.name
+            "id": product.product_brand_id.id,
+            "name": product.product_brand_id.name
         },
         "available_by_location": [{
             "location": {
