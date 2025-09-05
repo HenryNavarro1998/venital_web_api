@@ -53,6 +53,8 @@ class AccountJournal(http.Controller):
             "name": journal.name,
         } for journal in items]
 
+        # return data
+
         return request.make_response(
             json.dumps(data),
             headers=[("Content-Type", "application/json")]

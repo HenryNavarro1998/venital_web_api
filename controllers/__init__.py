@@ -7,3 +7,5 @@ from . import account_move
 from . import account_journal
 from . import product_category
 from . import product_product
+from . import sale_order
+from . import account_payment
