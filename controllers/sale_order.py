@@ -1,5 +1,6 @@
 from odoo import http
 from odoo.http import route, request
+from odoo.exceptions import UserError
 import json
 
 class SaleOrder(http.Controller):
@@ -14,35 +15,25 @@ class SaleOrder(http.Controller):
 
         return res
 
-    
+
     @route("/sale-order/refund", type="json", auth="api_key", methods=["POST"], csrf=False)
     def refund_order(self, *args, **kwargs):
-        
         data = json.loads(request.httprequest.data)
 
-        sale_order = request.env["sale.order"].browse(data["id"])
-        picking = sale_order.picking_ids.filtered(lambda p: p.state == "done" and p.picking_type_id.code == 'outgoing')
-
-
-        return_wizard = request.env["stock.return.picking"].with_context(active_id=picking.id).create({
-            "picking_id": picking.id
+        sale = request.env["sale.order"].browse(data["id"])
+        
+        picking = request.env["stock.picking"].create({
+            "sale_id": sale.id,
+            "partner_id": sale.partner_shipping_id.id,
         })
 
-        return_lines = []
-        for line in data.get("lines"):
-            return_lines.append((0,0,{
-                "move_id": picking.id,
-                "product_id": line["product"],
-                "quantity": line["quantity"]
-            }))
+        
 
-        return_wizard.product_return_moves = return_lines
-        return_picking_id = return_wizard.create_returns()
-        return_picking = request.env["stock.picking"].browse(return_picking_id)
-        return {
-            "name": return_picking.name
-        }
+        self.refund_pickings(sale)
 
+
+    def refund_picking(self, sale):
+        pass
 
 
     
