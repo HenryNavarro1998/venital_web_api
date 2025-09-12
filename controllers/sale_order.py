@@ -21,15 +21,31 @@ class SaleOrder(http.Controller):
         data = json.loads(request.httprequest.data)
 
         sale = request.env["sale.order"].browse(data["id"])
+
         
         picking = request.env["stock.picking"].create({
             "sale_id": sale.id,
             "partner_id": sale.partner_shipping_id.id,
+            "picking_type_id": request.env.ref("stock.picking_type_in").id,
+            "location_id": request.env.ref("stock.stock_location_suppliers").id,
+            "location_dest_id": request.env.ref("stock.stock_location_stock").id,
+            "move_ids": [(0,0,{
+                "name": line["product"].get("name"),
+                "product_id": line["product"].get("id"),
+                "quantity": line["quantity"],
+                "location_id": request.env.ref("stock.stock_location_suppliers").id,
+                "location_dest_id": request.env.ref("stock.stock_location_stock").id,
+            }) for line in data.get("lines")]
         })
+
+        return {
+            "id": picking.id,
+            "name": picking.name
+        }
 
         
 
-        self.refund_pickings(sale)
+        # self.refund_pickings(sale)
 
 
     def refund_picking(self, sale):
