@@ -21,10 +21,11 @@ class SaleOrder(http.Controller):
         data = json.loads(request.httprequest.data)
 
         sale = request.env["sale.order"].browse(data["id"])
+        group = sale.picking_ids.mapped("group_id")
 
         
         picking = request.env["stock.picking"].create({
-            "sale_id": sale.id,
+            "origin": sale.name,
             "partner_id": sale.partner_shipping_id.id,
             "picking_type_id": request.env.ref("stock.picking_type_in").id,
             "location_id": request.env.ref("stock.stock_location_suppliers").id,
@@ -38,9 +39,28 @@ class SaleOrder(http.Controller):
             }) for line in data.get("lines")]
         })
 
+        credit_note = request.env["account.move"].create({
+            "partner_id": sale.partner_id.id,
+            "move_type": "out_refund",
+            "invoice_line_ids": [(0,0, {
+                "product_id": line["product"].get("id"),
+                "quantity": line["quantity"]
+            }) for line in data["lines"]]
+        })
+
+        sale.invoice_ids |= credit_note
+        sale.picking_ids |= picking
+        picking.group_id = group.id
+
         return {
-            "id": picking.id,
-            "name": picking.name
+            "refund":{
+                "id": picking.id,
+                "name": picking.name
+            },
+            "creditNote": {
+                "id": credit_note.id,
+                "name": credit_note.name
+            }
         }
 
         
