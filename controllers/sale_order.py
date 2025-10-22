@@ -33,6 +33,7 @@ class SaleOrder(http.Controller):
             "move_ids": [(0,0,{
                 "name": line["product"].get("name"),
                 "product_id": line["product"].get("id"),
+                "group_id": group.id,
                 "quantity": line["quantity"],
                 "location_id": request.env.ref("stock.stock_location_suppliers").id,
                 "location_dest_id": request.env.ref("stock.stock_location_stock").id,
